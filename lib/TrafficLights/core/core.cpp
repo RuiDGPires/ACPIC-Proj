@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "TLKA/main.hpp"
-#include "TLKB/main.hpp"
-#include "main.hpp"
+#include "TLKA/core.hpp"
+#include "TLKB/core.hpp"
+#include "core.hpp"
 
 // ------
 //  UTIL
@@ -19,9 +19,9 @@
 #define N10(n) N9(n), n+9
 #define N11(n) N10(n), n+10
 
-void tl_setup(int tlka_g, int, int, int, int, int) {
-    tlka_setup(1, 2, 3);
-    tlkb_setup();
+void tl_setup(int, int, int, int, int, int) {
+    tlka_setup(N3(0)); // TODO
+    tlkb_setup(N6(0)); // TODO
 }
 
 void tl_loop() {
@@ -53,7 +53,7 @@ struct message_t {
     unsigned int sender, destination;
     unsigned int info;
     Operation op;
-}
+};
 
 char checksum(const char buffer[], int integrity_index) {
     // Checksum
@@ -79,35 +79,3 @@ void parse_message(const char buffer[], struct message_t *msg) {
         return; // TODO : ?
 }
 
-// If this is the main file for the arduino
-#ifndef __MAIN__ 
-
-const int entryNumber = getEntryNumber();
-
-void setup() {
-    Wire.begin(entryNumber);
-    Wire.onReceive(receiveEvent);
-    Wire.onRequest(requestEvent);
-
-    tl_setup(N6(1));
-}
-
-void loop() {
-    tl_loop();
-}
-
-void receiveEvent() {
-    char buffer[20];
-
-    // Read incoming string
-    for (int i = 0; Wire.available(); i++)
-        buffer[i] = Wire.read();
-
-    
-}
-
-void requestEvent() {
-
-}
-
-#endif
