@@ -104,6 +104,13 @@ void tlkb_unblock() {
     else; // ERROR, Do nothing??
 }
 
+void tlkb_default() {
+    reset();
+    ctx.swap = false;
+    ctx.on = false;
+    state = TLKB_STATE_DEFAULT;
+}
+
 TLKB_State tlkb_state() {
     return state;
 }

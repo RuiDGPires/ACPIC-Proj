@@ -55,6 +55,19 @@ void tlka_loop() {
         if (millis() >= stop) {
             wait = false;
             start = stop = 0;
+            if (state == TLKA_STATE_G2R) {
+                digitalWrite(pin_yellow, LOW);
+                digitalWrite(pin_red, HIGH);
+                state = TLKA_STATE_RED;
+                // Pedestrian RED
+                digitalWrite(pin_pedestrian_red, LOW);
+                digitalWrite(pin_pedestrian_green, HIGH);
+                //--
+            } else if (state == TLKA_STATE_R2G) {
+                digitalWrite(pin_yellow, LOW);
+                digitalWrite(pin_green, HIGH);
+                state = TLKA_STATE_GREEN;
+            }
         }
     } else {
         switch (state) {
@@ -66,23 +79,24 @@ void tlka_loop() {
 
             case TLKA_STATE_GREEN:
                 if (ctx.swap) {
+                    state = TLKA_STATE_G2R;
                     digitalWrite(pin_green, LOW);
-                    state = TLKA_STATE_RED;
                     digitalWrite(pin_yellow, HIGH);
                     ctx.swap = false;
-                    WAIT_FOR(BLINK_TIME);
-                } else {
-                    digitalWrite(pin_green, HIGH);
+                    WAIT_FOR(YELLOW_TIME);
                 }
                 break;
             case TLKA_STATE_RED:
                 if (ctx.swap) {
+                    state = TLKA_STATE_R2G;
+                    // Pedestrian RED
+                    digitalWrite(pin_pedestrian_green, LOW);
+                    digitalWrite(pin_pedestrian_red, HIGH);
+                    //--
                     digitalWrite(pin_red, LOW);
-                    state = TLKA_STATE_GREEN;
                     digitalWrite(pin_yellow, HIGH);
-                    WAIT_FOR(BLINK_TIME);
-                } else {
-                    digitalWrite(pin_red, HIGH);
+                    ctx.swap = false;
+                    WAIT_FOR(YELLOW_TIME);
                 }
                 break;
         }
@@ -103,4 +117,11 @@ TLKA_State tlka_state() {
 
 static void swap() {
     ctx.swap = true;
+}
+
+void tlka_default() {
+    reset();
+    ctx.swap = false;
+    ctx.on = false;
+    state = TLKA_STATE_DEFAULT;
 }

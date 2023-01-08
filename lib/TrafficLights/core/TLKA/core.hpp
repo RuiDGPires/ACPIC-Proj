@@ -16,5 +16,6 @@ void tlka_block();
 void tlka_unblock();
 
 TLKA_State tlka_state();
+void tlka_default();
 
 #endif

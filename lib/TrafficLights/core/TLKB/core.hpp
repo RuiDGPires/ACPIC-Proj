@@ -14,5 +14,6 @@ void tlkb_loop();
 void tlkb_block();
 void tlkb_unblock();
 TLKB_State tlkb_state();
+void tlkb_default();
 
 #endif
