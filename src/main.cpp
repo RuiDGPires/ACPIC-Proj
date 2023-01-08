@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <TrafficLights.h>
+#include <TrafficLights.hpp>
 
 #ifdef __MAIN__
 

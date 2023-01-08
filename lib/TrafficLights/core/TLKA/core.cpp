@@ -103,20 +103,24 @@ void tlka_loop() {
     }
 }
 
-void tlka_block() {
+static void swap() {
+    ctx.swap = true;
+}
 
+void tlka_block() {
+    if (state == TLKA_STATE_GREEN)
+        swap();
+    else; // ERROR, Do nothing??
 }
 
 void tlka_unblock() {
-
+    if (state == TLKA_STATE_RED)
+        swap();
+    else; // ERROR, Do nothing??
 }
 
 TLKA_State tlka_state() {
     return state;
-}
-
-static void swap() {
-    ctx.swap = true;
 }
 
 void tlka_default() {
