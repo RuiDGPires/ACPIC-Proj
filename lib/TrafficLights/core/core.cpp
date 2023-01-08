@@ -47,7 +47,7 @@ void tl_setup(int, int, int, int, int, int) {
     tlka_setup(N6(0)); // TODO
 }
 
-char checksum(const char buffer[], int integrity_index) {
+static char checksum(const char buffer[], int integrity_index) {
     // Checksum
     char sum = 0;
     for (int i = 0; i < integrity_index; i++)

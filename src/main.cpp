@@ -1,14 +1,6 @@
-#include <Arduino.h>
-#include <TrafficLights.hpp>
-
-#ifdef __MAIN__
-
-void setup() {
-
-}
-
-void loop() {
-
-}
-
+#ifdef __TL_MAIN__
+#include <TrafficLights.cpp>
+#endif
+#ifdef __CT_MAIN__
+#include <Controller.cpp>
 #endif

@@ -1,7 +1,4 @@
-#ifdef __TL_MAIN__
-#include "TrafficLights.cpp"
-#endif
-
-#ifdef __TL__
+#ifndef __TRAFFIC_LIGHTS_H__
+#define __TRAFFIC_LIGHTS_H__
 #include "core/core.hpp"
 #endif
