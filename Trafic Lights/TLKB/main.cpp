@@ -20,7 +20,7 @@ StateContext ctx;
 
 int pin_red, pin_yellow, pin_green, pin_pedestrian_green, pin_pedestrian_red, pin_button;
 
-void road_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestrian_red, int _pin_pedestrian_green, int _pin_button) {
+void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestrian_red, int _pin_pedestrian_green, int _pin_button) {
     pin_red     = _pin_red;
     pin_yellow  = _pin_yellow;
     pin_red     = _pin_green;
@@ -53,7 +53,7 @@ void reset() {
 }
 
 
-void road_loop() {
+void tlkb_loop() {
     static bool wait = false;
     static unsigned int start = 0; stop = 0;
 
