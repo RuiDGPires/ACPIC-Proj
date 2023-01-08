@@ -3,7 +3,6 @@
 #include "TLKA/core.hpp"
 #include "TLKB/core.hpp"
 #include "core.hpp"
-#include "coordination.hpp"
 
 #define BUF_MAX 5
 
