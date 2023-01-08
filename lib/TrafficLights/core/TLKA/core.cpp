@@ -2,12 +2,7 @@
 #include "core.hpp"
 
 #define BLINK_TIME 500 // 1 second total
-
-enum {
-    STATE_DEFAULT, // Blinking
-    STATE_RED,
-    STATE_GREEN
-};
+#define YELLOW_TIME 500
 
 typedef struct {
     bool on, // for STATE_DEFAULT
@@ -15,12 +10,11 @@ typedef struct {
         ; 
 } StateContext;
 
-static int state = STATE_DEFAULT;
+static TLKA_State state = TLKA_STATE_DEFAULT;
 static StateContext ctx = {false, false};
-
 static int pin_red, pin_yellow, pin_green;
 
-void reset() {
+static void reset() {
     digitalWrite(pin_red, LOW);
     digitalWrite(pin_yellow, LOW);
     digitalWrite(pin_green, LOW);
@@ -54,6 +48,15 @@ void tlka_loop() {
         if (millis() >= stop) {
             wait = false;
             start = stop = 0;
+            if (state == TLKA_STATE_G2R) {
+                digitalWrite(pin_yellow, LOW);
+                digitalWrite(pin_red, HIGH);
+                state = TLKA_STATE_RED;
+            } else if (state == TLKA_STATE_R2G) {
+                digitalWrite(pin_yellow, LOW);
+                digitalWrite(pin_green, HIGH);
+                state = TLKA_STATE_GREEN;
+            }
         }
     } else {
         switch (state) {
@@ -63,44 +66,44 @@ void tlka_loop() {
                 WAIT_FOR(BLINK_TIME);
                 break;
 
-            case STATE_GREEN:
+            case TLKA_STATE_GREEN:
                 if (ctx.swap) {
-                    state = STATE_RED;
+                    state = TLKA_STATE_G2R;
                     digitalWrite(pin_green, LOW);
                     digitalWrite(pin_yellow, HIGH);
                     ctx.swap = false;
-                    WAIT_FOR(BLINK_TIME);
-                } else {
-                    digitalWrite(pin_green, HIGH);
+                    WAIT_FOR(YELLOW_TIME);
                 }
                 break;
-            case STATE_RED:
+            case TLKA_STATE_RED:
                 if (ctx.swap) {
-                    state = STATE_GREEN;
+                    state = TLKA_STATE_R2G;
                     digitalWrite(pin_red, LOW);
                     digitalWrite(pin_yellow, HIGH);
                     ctx.swap = false;
-                    WAIT_FOR(BLINK_TIME);
-                } else {
-                    digitalWrite(pin_red, HIGH);
+                    WAIT_FOR(YELLOW_TIME);
                 }
                 break;
         }
     }
 }
 
-void swap() {
+static void swap() {
     ctx.swap = true;
 }
 
-void block() {
-    if (state == STATE_GREEN)
+void tlka_block() {
+    if (state == TLKA_STATE_GREEN)
         swap();
     else; // ERROR, Do nothing??
 }
 
-void unblock() {
-    if (state == STATE_RED)
+void tlka_unblock() {
+    if (state == TLKA_STATE_RED)
         swap();
     else; // ERROR, Do nothing??
+}
+
+TLKA_State tlka_state() {
+    return state;
 }

@@ -1,5 +1,17 @@
 #ifndef __TL_CORE__
 #define __TL_CORE__
+
+/*
+ * This will be the entry point for all the communication with the Traffic Lights
+ * ----
+ *  - setup and loop for functionality
+ *  - message(string)
+ *  - bool response(response *)
+ */
+
+#ifndef ENTRY_NUMBER
+#define ENTRY_NUMBER 1
+#endif
 //
 // ------
 //  UTIL
@@ -16,7 +28,10 @@
 #define N10(n) N9(n), n+9
 #define N11(n) N10(n), n+10
 
+
 void tl_setup(int, int, int, int, int, int);
 void tl_loop();
+void tl_message(const char *buffer);
+bool tl_response(char *buffer);
 
 #endif

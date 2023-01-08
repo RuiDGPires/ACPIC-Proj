@@ -3,19 +3,13 @@
 
 #define BLINK_TIME 500 // 1 second total
 
-enum {
-    STATE_DEFAULT, // Blinking
-    STATE_RED,
-    STATE_GREEN
-};
-
 typedef struct {
     bool on = false, // for STATE_DEFAULT
         swap = false // for STATE_GREEN and STATE_RED
         ; 
 } StateContext;
 
-static int state = STATE_DEFAULT;
+static int state = TLKB_STATE_DEFAULT;
 static StateContext ctx;
 
 static int pin_red, pin_yellow, pin_green, pin_pedestrian_green, pin_pedestrian_red, pin_button;
@@ -71,10 +65,10 @@ void tlkb_loop() {
                 WAIT_FOR(BLINK_TIME);
                 break;
 
-            case STATE_GREEN:
+            case TLKB_STATE_GREEN:
                 if (ctx.swap) {
                     digitalWrite(pin_green, LOW);
-                    state = STATE_RED;
+                    state = TLKB_STATE_RED;
                     digitalWrite(pin_yellow, HIGH);
                     ctx.swap = false;
                     WAIT_FOR(BLINK_TIME);
@@ -82,10 +76,10 @@ void tlkb_loop() {
                     digitalWrite(pin_green, HIGH);
                 }
                 break;
-            case STATE_RED:
+            case TLKB_STATE_RED:
                 if (ctx.swap) {
                     digitalWrite(pin_red, LOW);
-                    state = STATE_GREEN;
+                    state = TLKB_STATE_GREEN;
                     digitalWrite(pin_yellow, HIGH);
                     WAIT_FOR(BLINK_TIME);
                 } else {
@@ -96,10 +90,18 @@ void tlkb_loop() {
     }
 }
 
-static void swap() {
-    ctx.swap = true;
+void tlkb_block() {
+
 }
 
-static void status() {
+void tlkb_unblock() {
 
+}
+
+TLKB_State tlkb_state() {
+    return state;
+}
+
+static void swap() {
+    ctx.swap = true;
 }
