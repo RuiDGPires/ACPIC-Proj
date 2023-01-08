@@ -18,8 +18,8 @@ enum {
 static int state = TL_STATE_DEFAULT;
 
 void tl_setup(int, int, int, int, int, int) {
-    tlka_setup(N3(0)); // TODO
-    tlkb_setup(N6(0)); // TODO
+    tlkb_setup(N3(0)); // TODO
+    tlka_setup(N6(0)); // TODO
 }
 
 void tl_loop() {

@@ -2,44 +2,36 @@
 #include "core.hpp"
 
 #define BLINK_TIME 500 // 1 second total
+#define YELLOW_TIME 500
 
 typedef struct {
-    bool on = false, // for STATE_DEFAULT
-        swap = false // for STATE_GREEN and STATE_RED
+    bool on, // for STATE_DEFAULT
+        swap // for STATE_GREEN and STATE_RED
         ; 
 } StateContext;
 
-static int state = TLKB_STATE_DEFAULT;
-static StateContext ctx;
-
-static int pin_red, pin_yellow, pin_green, pin_pedestrian_green, pin_pedestrian_red, pin_button;
+static TLKB_State state = TLKB_STATE_DEFAULT;
+static StateContext ctx = {false, false};
+static int pin_red, pin_yellow, pin_green;
 
 static void reset() {
     digitalWrite(pin_red, LOW);
     digitalWrite(pin_yellow, LOW);
     digitalWrite(pin_green, LOW);
-    digitalWrite(pin_pedestrian_green, LOW);
-    digitalWrite(pin_pedestrian_red, LOW);
 }
 
-void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestrian_red, int _pin_pedestrian_green, int _pin_button) {
-    Serial.begin(4800);
+void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green) {
     pin_red     = _pin_red;
     pin_yellow  = _pin_yellow;
     pin_red     = _pin_green;
-    pin_pedestrian_green = _pin_pedestrian_green;
-    pin_pedestrian_red = _pin_pedestrian_red;
-    pin_button = _pin_button;
 
     pinMode(pin_red, OUTPUT);
     pinMode(pin_yellow, OUTPUT);
     pinMode(pin_green, OUTPUT);
-    pinMode(pin_pedestrian_green, OUTPUT);
-    pinMode(pin_pedestrian_red, OUTPUT);
-    pinMode(pin_button, INPUT);
 
     reset();
 }
+
 
 #define WAIT_FOR(time) {\
     start = millis(); \
@@ -56,6 +48,15 @@ void tlkb_loop() {
         if (millis() >= stop) {
             wait = false;
             start = stop = 0;
+            if (state == TLKB_STATE_G2R) {
+                digitalWrite(pin_yellow, LOW);
+                digitalWrite(pin_red, HIGH);
+                state = TLKB_STATE_RED;
+            } else if (state == TLKB_STATE_R2G) {
+                digitalWrite(pin_yellow, LOW);
+                digitalWrite(pin_green, HIGH);
+                state = TLKB_STATE_GREEN;
+            }
         }
     } else {
         switch (state) {
@@ -67,41 +68,42 @@ void tlkb_loop() {
 
             case TLKB_STATE_GREEN:
                 if (ctx.swap) {
+                    state = TLKB_STATE_G2R;
                     digitalWrite(pin_green, LOW);
-                    state = TLKB_STATE_RED;
                     digitalWrite(pin_yellow, HIGH);
                     ctx.swap = false;
-                    WAIT_FOR(BLINK_TIME);
-                } else {
-                    digitalWrite(pin_green, HIGH);
+                    WAIT_FOR(YELLOW_TIME);
                 }
                 break;
             case TLKB_STATE_RED:
                 if (ctx.swap) {
+                    state = TLKB_STATE_R2G;
                     digitalWrite(pin_red, LOW);
-                    state = TLKB_STATE_GREEN;
                     digitalWrite(pin_yellow, HIGH);
-                    WAIT_FOR(BLINK_TIME);
-                } else {
-                    digitalWrite(pin_red, HIGH);
+                    ctx.swap = false;
+                    WAIT_FOR(YELLOW_TIME);
                 }
                 break;
         }
     }
 }
 
-void tlkb_block() {
+static void swap() {
+    ctx.swap = true;
+}
 
+void tlkb_block() {
+    if (state == TLKB_STATE_GREEN)
+        swap();
+    else; // ERROR, Do nothing??
 }
 
 void tlkb_unblock() {
-
+    if (state == TLKB_STATE_RED)
+        swap();
+    else; // ERROR, Do nothing??
 }
 
 TLKB_State tlkb_state() {
     return state;
-}
-
-static void swap() {
-    ctx.swap = true;
 }

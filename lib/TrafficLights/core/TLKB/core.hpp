@@ -1,5 +1,5 @@
-#ifndef __TLKB_CORE_H__
-#define __TLKB_CORE_H__
+#ifndef __TLKB_CORE_HPP__
+#define __TLKB_CORE_HPP__
 
 typedef enum {
     TLKB_STATE_DEFAULT, // Blinking
@@ -9,12 +9,10 @@ typedef enum {
     TLKB_STATE_GREEN
 } TLKB_State;
 
-void tlkb_setup(int, int, int, int, int, int);
+void tlkb_setup(int, int, int);
 void tlkb_loop();
-
 void tlkb_block();
 void tlkb_unblock();
-
 TLKB_State tlkb_state();
 
 #endif
