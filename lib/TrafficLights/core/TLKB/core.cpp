@@ -29,8 +29,10 @@ static void reset() {
 }
 
 void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestrian_red, int _pin_pedestrian_green, int _pin_button) {
+    Serial.begin(4800);
     pin_red     = _pin_red;
-    pin_yellow  = _pin_yellow;
+    //pin_yellow  = _pin_yellow;
+    pin_yellow  = LED_BUILTIN;
     pin_red     = _pin_green;
     pin_pedestrian_green = _pin_pedestrian_green;
     pin_pedestrian_red = _pin_pedestrian_red;
@@ -55,7 +57,7 @@ void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestri
 
 void tlkb_loop() {
     static bool wait = false;
-    static unsigned int start = 0, stop = 0;
+    static uint32_t start = 0, stop = 0;
 
     if (wait) {
         if (millis() >= stop) {
