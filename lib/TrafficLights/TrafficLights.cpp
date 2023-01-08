@@ -22,7 +22,7 @@ void setup() {
     Wire.onReceive(receiveEvent);
     Wire.onRequest(requestEvent);
 
-    tl_setup(0, 0, 0, 0, 0, 0);
+    tl_setup(N6(2));
 }
 
 void loop() {
