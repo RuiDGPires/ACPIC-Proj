@@ -10,7 +10,7 @@ void setup() {
     Wire.onRequest(requestEvent);
 
     roundabout_setup();
-    road_setup();
+    road_setup(1, 2, 3);
 }
 
 void loop() {
