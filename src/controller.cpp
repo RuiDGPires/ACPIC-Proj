@@ -3,7 +3,7 @@
 #include <Wire.h>
 
 void setup() {
-    ct_setup(3, 3);
+    ct_setup(3, 3, 3);
 }
 
 void loop() {
