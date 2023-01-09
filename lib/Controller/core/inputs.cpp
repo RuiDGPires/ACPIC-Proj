@@ -3,7 +3,9 @@
 
 static int button_pin, pot_pin;
 
-void inputs_setup(int button_pin, int pot_pin) {
+void inputs_setup(int _button_pin, int _pot_pin) {
+  button_pin = _button_pin;
+  pot_pin = _pot_pin;
     Serial.println("Button pin set up: " + String(button_pin));
     pinMode(button_pin, INPUT);
     pinMode(pot_pin, INPUT);

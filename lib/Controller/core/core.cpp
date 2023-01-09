@@ -10,9 +10,9 @@
 
 #define BUF_MAX 5
 #define POT_MIN 0
-#define POT_MAX 255 
-#define PERIOD_MIN 2
-#define PERIOD_MAX 15
+#define POT_MAX 1023
+#define PERIOD_MIN 2000
+#define PERIOD_MAX 15000
 
 typedef enum {
     STATE_OFF,
@@ -48,6 +48,13 @@ static void timer_activated() {
     }
 }
 
+static void print_msg(const char buffer[]) {
+    Serial.print(  String((int)buffer[0]) + "|");
+    Serial.print(  String((int)buffer[1]) + "|");
+    Serial.print(  String((int)buffer[2]) + "|");
+    Serial.println(String((int)buffer[3]));
+}
+
 static void ct_send_message(int to, Operation op) {
     char buffer[BUF_MAX];
 
@@ -55,6 +62,8 @@ static void ct_send_message(int to, Operation op) {
     buffer[1] = (char) op;
     buffer[2] = (char) to;
     buffer[3] = checksum(buffer, 3);
+
+    print_msg(buffer);
 
     int size = op == OP_PING ? 5 : 4;
 #ifdef __TL__ // Check if message is for this device
@@ -66,7 +75,8 @@ static void ct_send_message(int to, Operation op) {
 #endif
 
     Wire.beginTransmission(to);
-    Wire.write(buffer);
+    for (int i = 0; i < 4; i++)
+        Wire.write(buffer[i]);
     Wire.endTransmission();
     Wire.requestFrom(to, size);
 
@@ -80,9 +90,9 @@ parse_response:;
 
         if (info & (PEDEST_GREEN_FAILING | PEDEST_YELLOW_FAILING | PEDEST_RED_FAILING | GREEN_FAILING | YELLOW_FAILING | RED_FAILING)) {
             ct_send_message(1, OP_OFF);
-            ct_send_message(2, OP_OFF);
-            ct_send_message(3, OP_OFF);
-            ct_send_message(4, OP_OFF);
+            //ct_send_message(2, OP_OFF);
+            //ct_send_message(3, OP_OFF);
+            //ct_send_message(4, OP_OFF);
             state = STATE_FAULT;
         }
 
@@ -96,9 +106,9 @@ static void toggleOnOff() {
         state = STATE_ENTRY;
     } else {
         ct_send_message(1, OP_OFF);
-        ct_send_message(2, OP_OFF);
-        ct_send_message(3, OP_OFF);
-        ct_send_message(4, OP_OFF);
+        //ct_send_message(2, OP_OFF);
+        //ct_send_message(3, OP_OFF);
+        //ct_send_message(4, OP_OFF);
         digitalWrite(led_pin, LOW);
         state = STATE_OFF;
     }
@@ -116,6 +126,31 @@ void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) {
     pinMode(led_pin, OUTPUT);
 }
 
+static void ping(unsigned int time) {
+    static uint32_t start = 0; stop = 0;
+    static bool wait = false;
+
+    if (wait) {
+        if (millis() >= stop) {
+            wait = false;
+            start = stop = 0;
+        }
+    } else {
+        if (state == STATE_NORMAL) {// Ping the current leds to check if the timer button has been pressed
+            ct_send_message(current, OP_PING);
+            WAIT_FOR(time);
+        }
+    }
+}
+
+#define PRINT_ONCE(msg) { \
+    static bool once = true;\
+    if (once) { \
+        Serial.println(msg); \
+        once = false; \
+    } \
+}
+
 void ct_loop() {
     inputs_check(&inputs);
 
@@ -129,26 +164,31 @@ void ct_loop() {
             wait = false;
             start = stop = 0;
         }
-        if (state == STATE_NORMAL) // Ping the current leds to check if the timer button has been pressed
-            ct_send_message(current, OP_PING);
+
+        //if (state == STATE_NORMAL)
+        //    ping(1000);
+
     } else {
+        static uint32_t time = map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX);
+        PRINT_ONCE("Time:" + String(time));
         switch (state) {
             case STATE_ENTRY:
                 digitalWrite(led_pin, HIGH);
-                ct_send_message(2, OP_RED);
-                ct_send_message(3, OP_RED);
-                ct_send_message(4, OP_RED);
+                //ct_send_message(2, OP_RED);
+                //ct_send_message(3, OP_RED);
+                //ct_send_message(4, OP_RED);
                 //--
                 current = 1;
                 ct_send_message(current, OP_GREEN);
                 state = STATE_NORMAL;
+                WAIT_FOR(time);
                 break;
             case STATE_NORMAL:
                 ct_send_message(current, OP_RED);
                 current = (current % 4) + 1;
                 ct_send_message(current, OP_GREEN);
                 timer_once = false;
-                WAIT_FOR(map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX));
+                WAIT_FOR(time);
                 break;
             default: 
                 break;

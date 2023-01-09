@@ -3,14 +3,23 @@
 #include <Wire.h>
 #include <TrafficLights.hpp>
 
+static void print_msg(const char buffer[]) {
+    Serial.print(  String((int)buffer[0]) + "|");
+    Serial.print(  String((int)buffer[1]) + "|");
+    Serial.print(  String((int)buffer[2]) + "|");
+    Serial.println(String((int)buffer[3]));
+}
+
 static bool request = false;
 void receiveEvent(int) {
+    Serial.println("Message received:");
     char buffer[BUF_MAX];
 
     // Read incoming string
     for (int i = 0; Wire.available(); i++)
         buffer[i] = Wire.read();
 
+    print_msg(buffer);
     tl_message(buffer);
 }
 

@@ -53,7 +53,6 @@ static struct tl_response_t response;
 static int state = TL_STATE_DEFAULT;
 static char status = 0;
 
-
 void tl_setup(int ar, int ay, int ag, int pb, int pr, int pg, int br, int by, int bg) {
     tlkb_setup(br, by, bg);
     tlka_setup(ar, ay, ag, pr, pg, pb);
@@ -127,7 +126,6 @@ void tl_loop() {
     tlka_loop();
     tlkb_loop();
 }
-
 
 void tl_message(const char buffer[]) {
     struct message_t msg;
