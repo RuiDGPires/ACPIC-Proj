@@ -32,6 +32,17 @@
 #define N10(n) N9(n), n+9
 #define N11(n) N10(n), n+10
 
+#ifndef __OPERATION__
+#define __OPERATION__
+typedef enum {
+    OP_RED = 0,
+    OP_GREEN,
+    OP_OFF,
+    OP_PING,
+    OP_ACK,
+    OP_STATUS
+} Operation;
+#endif
 
 void tl_setup(int, int, int, int, int, int, int, int, int);
 void tl_loop();

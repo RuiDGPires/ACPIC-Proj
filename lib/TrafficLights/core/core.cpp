@@ -29,15 +29,6 @@ enum {
     TL_STATE_NONE
 };
 
-typedef enum {
-    OP_RED = 0,
-    OP_GREEN,
-    OP_OFF,
-    OP_PING,
-    OP_ACK,
-    OP_STATUS
-} Operation;
-
 struct message_t {
     unsigned int sender, destination;
     Operation op;
@@ -169,6 +160,7 @@ bool tl_response(char buffer[]) {
             buffer[i] = response.buffer[i];
         }
         response.ready = false;
+
         return true;
     }
     

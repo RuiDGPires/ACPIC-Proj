@@ -4,6 +4,8 @@
 void ct_setup(int, int, int);
 void ct_loop();
 
+#ifndef __OPERATION__
+#define __OPERATION__
 typedef enum {
     OP_RED = 0,
     OP_GREEN,
@@ -12,6 +14,7 @@ typedef enum {
     OP_ACK,
     OP_STATUS
 } Operation;
+#endif
 
 struct message_t {
     unsigned int sender, destination;

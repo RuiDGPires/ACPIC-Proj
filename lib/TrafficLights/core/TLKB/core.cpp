@@ -95,12 +95,20 @@ static void swap() {
 void tlkb_block() {
     if (state == TLKB_STATE_GREEN)
         swap();
+    else if (state == TLKB_STATE_DEFAULT) {
+        state = TLKB_STATE_GREEN;
+        swap();
+    }
     else; // ERROR, Do nothing??
 }
 
 void tlkb_unblock() {
     if (state == TLKB_STATE_RED)
         swap();
+    else if (state == TLKB_STATE_DEFAULT) {
+        state = TLKB_STATE_RED;
+        swap();
+    }
     else; // ERROR, Do nothing??
 }
 

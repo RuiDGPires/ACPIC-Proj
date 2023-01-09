@@ -9,7 +9,5 @@ void setup() {
 }
 
 void loop() {
-    //delay(200);
-    //Serial.println(String(digitalRead(3)));
     ct_loop();
 }

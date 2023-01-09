@@ -56,6 +56,8 @@ static void print_msg(const char buffer[]) {
 }
 
 static void ct_send_message(int to, Operation op) {
+    if (to != 1)
+        return;
     char buffer[BUF_MAX];
 
     buffer[0] = 0;
@@ -63,6 +65,7 @@ static void ct_send_message(int to, Operation op) {
     buffer[2] = (char) to;
     buffer[3] = checksum(buffer, 3);
 
+    Serial.print("Sending: ");
     print_msg(buffer);
 
     int size = op == OP_PING ? 5 : 4;
@@ -78,11 +81,21 @@ static void ct_send_message(int to, Operation op) {
     for (int i = 0; i < 4; i++)
         Wire.write(buffer[i]);
     Wire.endTransmission();
-    Wire.requestFrom(to, size);
 
-    for (int i = 0; Wire.available(); i++) {
-        buffer[i] = Wire.read();
+    while (true) { // Wait for acknowledge
+        Wire.requestFrom(to, size);
+        while (size > Wire.available());
+
+        for (int i = 0; i < size; i++)
+            buffer[i] = Wire.read();
+
+        if (op == OP_PING && buffer[1] == OP_STATUS)
+            break;
+        else if (buffer[1] == OP_ACK)
+            break;
     }
+
+    Serial.println("Response: " + String((int) buffer[1]));
 
 parse_response:;
     if (buffer[1] == OP_STATUS) {
@@ -90,9 +103,9 @@ parse_response:;
 
         if (info & (PEDEST_GREEN_FAILING | PEDEST_YELLOW_FAILING | PEDEST_RED_FAILING | GREEN_FAILING | YELLOW_FAILING | RED_FAILING)) {
             ct_send_message(1, OP_OFF);
-            //ct_send_message(2, OP_OFF);
-            //ct_send_message(3, OP_OFF);
-            //ct_send_message(4, OP_OFF);
+            ct_send_message(2, OP_OFF);
+            ct_send_message(3, OP_OFF);
+            ct_send_message(4, OP_OFF);
             state = STATE_FAULT;
         }
 
@@ -106,9 +119,9 @@ static void toggleOnOff() {
         state = STATE_ENTRY;
     } else {
         ct_send_message(1, OP_OFF);
-        //ct_send_message(2, OP_OFF);
-        //ct_send_message(3, OP_OFF);
-        //ct_send_message(4, OP_OFF);
+        ct_send_message(2, OP_OFF);
+        ct_send_message(3, OP_OFF);
+        ct_send_message(4, OP_OFF);
         digitalWrite(led_pin, LOW);
         state = STATE_OFF;
     }
@@ -122,6 +135,7 @@ static void toggleOnOff() {
 
 void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) {
     led_pin = _led_pin;
+    Wire.begin();
     inputs_setup(_button_pin, _potetiometer_pin);
     pinMode(led_pin, OUTPUT);
 }
@@ -174,9 +188,9 @@ void ct_loop() {
         switch (state) {
             case STATE_ENTRY:
                 digitalWrite(led_pin, HIGH);
-                //ct_send_message(2, OP_RED);
-                //ct_send_message(3, OP_RED);
-                //ct_send_message(4, OP_RED);
+                ct_send_message(2, OP_RED);
+                ct_send_message(3, OP_RED);
+                ct_send_message(4, OP_RED);
                 //--
                 current = 1;
                 ct_send_message(current, OP_GREEN);
