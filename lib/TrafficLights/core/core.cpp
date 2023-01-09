@@ -7,6 +7,16 @@
 #include "TLKB/core.hpp"
 #include "core.hpp"
 
+// TODO : ASK IF IT IS LEFT TO RIGHT OR RIGHT TO LEFT
+enum {
+    TIMER_ACTIVATED         = 0x1 << 1,  // BUTTON PRESSED
+    GREEN_FAILING           = 0x1 << 2,
+    YELLOW_FAILING          = 0x1 << 3,
+    RED_FAILING             = 0x1 << 4,
+    PEDEST_GREEN_FAILING    = 0x1 << 5,
+    PEDEST_YELLOW_FAILING   = 0x1 << 6,
+    PEDEST_RED_FAILING      = 0x1 << 7,
+};
 
 enum {
     TL_STATE_DEFAULT,
@@ -44,9 +54,9 @@ static int state = TL_STATE_DEFAULT;
 static char status = 0;
 
 
-void tl_setup(int, int, int, int, int, int) {
-    tlkb_setup(N3(0)); // TODO
-    tlka_setup(N6(0)); // TODO
+void tl_setup(int ar, int ay, int ag, int pb, int pr, int pg, int br, int by, int bg) {
+    tlkb_setup(br, by, bg);
+    tlka_setup(ar, ay, ag, pr, pg, pb);
 }
 
 static char checksum(const char buffer[], int integrity_index) {
@@ -68,6 +78,7 @@ void build_response() {
 
     if (response.op == OP_STATUS) {
         response.buffer[3] = status; 
+        status &= ~((unsigned char) TIMER_ACTIVATED);
         integrity++;
     }
    
@@ -77,6 +88,10 @@ void build_response() {
 }
 
 void tl_loop() {
+    if (tlka_check_button()) {
+        status |= TIMER_ACTIVATED;
+    }
+
     switch (state) {
         case TL_STATE_WAIT_ENTRY_BLOCKED:
             if (tlka_state() == TLKA_STATE_RED) {
@@ -113,16 +128,6 @@ void tl_loop() {
     tlkb_loop();
 }
 
-// TODO : ASK IF IT IS LEFT TO RIGHT OR RIGHT TO LEFT
-enum {
-    TIMER_ACTIVATED         = 0x1 << 1,  // BUTTON PRESSED
-    GREEN_FAILING           = 0x1 << 2,
-    YELLOW_FAILING          = 0x1 << 3,
-    RED_FAILING             = 0x1 << 4,
-    PEDEST_GREEN_FAILING    = 0x1 << 5,
-    PEDEST_YELLOW_FAILING   = 0x1 << 6,
-    PEDEST_RED_FAILING      = 0x1 << 7,
-};
 
 void tl_message(const char buffer[]) {
     struct message_t msg;

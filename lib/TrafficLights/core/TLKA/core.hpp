@@ -17,5 +17,6 @@ void tlka_unblock();
 
 TLKA_State tlka_state();
 void tlka_default();
+bool tlka_check_button();
 
 #endif

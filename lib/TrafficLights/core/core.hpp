@@ -33,7 +33,7 @@
 #define N11(n) N10(n), n+10
 
 
-void tl_setup(int, int, int, int, int, int);
+void tl_setup(int, int, int, int, int, int, int, int, int);
 void tl_loop();
 void tl_message(const char *buffer);
 bool tl_response(char *buffer);

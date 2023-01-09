@@ -21,7 +21,7 @@ typedef enum {
     STATE_FAULT,
 } State;
 
-static int potetiometer_pin, button_pin, led_pin;
+static int led_pin;
 static struct inputs inputs;
 static State state = STATE_OFF;
 static int current = 1;
@@ -112,9 +112,7 @@ static void toggleOnOff() {
 
 void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) {
     led_pin = _led_pin;
-    potetiometer_pin = _potetiometer_pin;
-    button_pin = _button_pin;
-    inputs_setup(button_pin, potetiometer_pin);
+    inputs_setup(_button_pin, _potetiometer_pin);
     pinMode(led_pin, OUTPUT);
 }
 
@@ -150,7 +148,7 @@ void ct_loop() {
                 current = (current % 4) + 1;
                 ct_send_message(current, OP_GREEN);
                 timer_once = false;
-                WAIT_FOR(PERIOD_MIN + (PERIOD_MAX - PERIOD_MIN) * (inputs.pot - POT_MIN)/(POT_MAX - POT_MIN));
+                WAIT_FOR(map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX));
                 break;
             default: 
                 break;

@@ -19,11 +19,13 @@ void requestEvent() {
 }
 
 void setup() {
+    Serial.begin(9600);
     Wire.begin(ENTRY_NUMBER);
     Wire.onReceive(receiveEvent);
     Wire.onRequest(requestEvent);
 
-    tl_setup(N6(2));
+    tl_setup(N9(2));
+    Serial.println("Traffic Lights Setup Complete");
 }
 
 char buffer[10];
