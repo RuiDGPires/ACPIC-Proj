@@ -1,10 +1,12 @@
+#ifndef __TL_CORE_CPP__
+#define __TL_CORE_CPP__
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "TLKA/core.hpp"
 #include "TLKB/core.hpp"
 #include "core.hpp"
 
-#define BUF_MAX 5
 
 enum {
     TL_STATE_DEFAULT,
@@ -169,3 +171,4 @@ bool tl_response(char buffer[]) {
     
     return false;
 }
+#endif

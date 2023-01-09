@@ -1,8 +1,9 @@
+#include <Arduino.h>
+#include <Controller.hpp>
 #include <Wire.h>
-#include "core/core.cpp"
 
 void setup() {
-    ct_setup(3);
+    ct_setup(3, 3);
 }
 
 void loop() {

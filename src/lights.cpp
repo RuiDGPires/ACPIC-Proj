@@ -1,9 +1,7 @@
-#ifndef ENTRY_NUMBER
 #define ENTRY_NUMBER 1
-#endif
-
+#include <Arduino.h>
 #include <Wire.h>
-#include "core/core.cpp"
+#include <TrafficLights.hpp>
 
 static bool request = false;
 void receiveEvent(int) {
@@ -39,3 +37,4 @@ void loop() {
 
     tl_loop();
 }
+

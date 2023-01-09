@@ -12,6 +12,10 @@
 #ifndef ENTRY_NUMBER
 #define ENTRY_NUMBER 1
 #endif
+
+#ifndef BUF_MAX
+#define BUF_MAX 5
+#endif
 //
 // ------
 //  UTIL
