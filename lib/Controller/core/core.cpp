@@ -13,6 +13,13 @@
 #define POT_MAX 1023
 #define PERIOD_MIN 2000
 #define PERIOD_MAX 15000
+#define BLINK_PERIOD 250
+
+#define WAIT_FOR(time) {\
+    start = millis(); \
+    stop = start + (time); \
+    wait = true; \
+}
 
 typedef enum {
     STATE_OFF,
@@ -52,7 +59,12 @@ static void print_msg(const char buffer[]) {
     Serial.print(  String((int)buffer[0]) + "|");
     Serial.print(  String((int)buffer[1]) + "|");
     Serial.print(  String((int)buffer[2]) + "|");
-    Serial.println(String((int)buffer[3]));
+    if (buffer[1] == OP_STATUS) {
+        Serial.print(String((int)buffer[3]) + "|");
+        Serial.println(String((int)buffer[4]));
+    } else {
+        Serial.println(String((int)buffer[3]));
+    }
 }
 
 static void ct_send_message(int to, Operation op) {
@@ -82,9 +94,26 @@ static void ct_send_message(int to, Operation op) {
         Wire.write(buffer[i]);
     Wire.endTransmission();
 
+    bool on = true;
+    uint32_t next = 0;
     while (true) { // Wait for acknowledge
+
+        uint32_t now = millis();
+        if (now >= next) {
+            on = !on;
+            digitalWrite(led_pin, on ? HIGH : LOW);
+            next = now + BLINK_PERIOD;
+        }
+
         Wire.requestFrom(to, size);
-        while (size > Wire.available());
+        while (size > Wire.available()) {
+            uint32_t now = millis();
+            if (now >= next) {
+                on = !on;
+                digitalWrite(led_pin, on ? HIGH : LOW);
+                next = now + BLINK_PERIOD;
+            }
+        }
 
         for (int i = 0; i < size; i++)
             buffer[i] = Wire.read();
@@ -95,7 +124,9 @@ static void ct_send_message(int to, Operation op) {
             break;
     }
 
-    Serial.println("Response: " + String((int) buffer[1]));
+    digitalWrite(led_pin, HIGH);
+    Serial.print("Response: ");
+    print_msg(buffer);
 
 parse_response:;
     if (buffer[1] == OP_STATUS) {
@@ -127,13 +158,6 @@ static void toggleOnOff() {
     }
 }
 
-#define WAIT_FOR(time) {\
-    Serial.println("Waiting for: " + String(time)); \
-    start = millis(); \
-    stop = start + (time); \
-    wait = true; \
-}
-
 void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) {
     led_pin = _led_pin;
     Wire.begin();
@@ -142,7 +166,7 @@ void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) {
 }
 
 static void ping(unsigned int time) {
-    static uint32_t start = 0; stop = 0;
+    static uint32_t start = 0, stop = 0;
     static bool wait = false;
 
     if (wait) {
@@ -173,7 +197,7 @@ void ct_loop() {
     const static int error = 5;
     
     if (inputs.pot > last_pot + error || inputs.pot < last_pot - error) {
-        Serial.println("Pot: " + String(inputs.pot));
+        //Serial.println("Pot: " + String(inputs.pot));
     }
 
     if (inputs.button) {
@@ -188,7 +212,7 @@ void ct_loop() {
         }
 
         //if (state == STATE_NORMAL)
-        //    ping(1000);
+        //    ping(200);
 
     } else {
         uint32_t time = map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX);
