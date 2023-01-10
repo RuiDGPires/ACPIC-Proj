@@ -2,18 +2,11 @@
 #define ENTRY_NUMBER 1
 #endif
 
-#define PRINT_ONCE(msg) { \
-    static bool once = true;\
-    if (once) { \
-        Serial.println(msg); \
-        once = false; \
-    } \
-}
 #include <Arduino.h>
 #include <Wire.h>
 #include <TrafficLights.hpp>
 
-static void print_msg(const char buffer[]) {
+static void print_msg(const char buffer[]) { // [DEBUG] Print message buffer
     Serial.print(  String((int)buffer[0]) + "|");
     Serial.print(  String((int)buffer[1]) + "|");
     Serial.print(  String((int)buffer[2]) + "|");
@@ -62,7 +55,7 @@ void setup() {
     tl_setup(A2, 3, 4, 5, A1, 7, A0, 9, 10);
     Serial.println("Traffic Lights Setup Complete. Entry number: " + String(ENTRY_NUMBER));
 
-    PRINT_ONCE("ENTRY NUMBER: " + String(ENTRY_NUMBER));
+    Serial.println("ENTRY NUMBER: " + String(ENTRY_NUMBER));
 }
 
 void loop() {

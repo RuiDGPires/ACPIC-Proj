@@ -56,7 +56,7 @@ void tlka_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestri
     wait = true; \
 }
 
-static bool red_pin_ok(int pin) {
+static bool red_pin_ok(int pin) { // Check for faults
     static const int error = 15, base = 963;
     unsigned int val = analogRead(pin);
     return  val >= base - error && val <= base + error;
@@ -70,18 +70,18 @@ void tlka_loop() {
         if (millis() >= stop) {
             wait = false;
             start = stop = 0;
-            if (state == TLKA_STATE_G2R) {
+            if (state == TLKA_STATE_G2R) { // YELLOW : GREEN TO RED
                 digitalWrite(pin_yellow, LOW);
                 digitalWrite(pin_red, HIGH);
                 
-                fault_r = !red_pin_ok(pin_red);
+                fault_r = !red_pin_ok(pin_red); // Check for faults
 
                 state = TLKA_STATE_RED;
                 // Pedestrian RED
                 digitalWrite(pin_pedestrian_red, LOW);
                 digitalWrite(pin_pedestrian_green, HIGH);
                 //--
-            } else if (state == TLKA_STATE_R2G) {
+            } else if (state == TLKA_STATE_R2G) { // YELLOW : RED TO GREEN
                 digitalWrite(pin_yellow, LOW);
                 digitalWrite(pin_green, HIGH);
                 state = TLKA_STATE_GREEN;

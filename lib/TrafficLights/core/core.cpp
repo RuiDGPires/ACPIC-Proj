@@ -49,7 +49,7 @@ void tl_setup(int ar, int ay, int ag, int pb, int pr, int pg, int br, int by, in
     tlka_setup(ar, ay, ag, pr, pg, pb);
 }
 
-static char checksum(const char buffer[], int integrity_index) {
+static char checksum(const char buffer[], int integrity_index) { // Calculate the checksum
     // Checksum
     char sum = 0;
     for (int i = 0; i < integrity_index; i++)
@@ -59,7 +59,7 @@ static char checksum(const char buffer[], int integrity_index) {
 }
 
 
-void build_response() {
+void build_response() { // Builds a response to send to the controller
     response.buffer[0] = ENTRY_NUMBER;
     response.buffer[1] = response.op;
     response.buffer[2] = 0;
@@ -127,7 +127,7 @@ void tl_loop() {
     tlkb_loop();
 }
 
-void tl_message(const char buffer[]) {
+void tl_message(const char buffer[]) { // Message was sent to these Traffic Lights
     struct message_t msg;
     // UNSAFE | NO CHECKS FOR THE BUFFER LENGTH
     msg.sender         = (unsigned int) buffer[0];
@@ -170,7 +170,7 @@ void tl_message(const char buffer[]) {
     }
 }
 
-bool tl_response(char buffer[]) {
+bool tl_response(char buffer[]) { // Respond accordingly
     if (response.ready) {
         for (int i = 0; i < BUF_MAX; i++) {
             buffer[i] = response.buffer[i];

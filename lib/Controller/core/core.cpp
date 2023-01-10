@@ -38,7 +38,7 @@ static bool wait = false;
 static uint32_t start = 0, stop = 0;
 static bool timer_once = false;
 
-static char checksum(const char buffer[], int integrity_index) {
+static char checksum(const char buffer[], int integrity_index) { // Calculate the checksum of a buffer
     // Checksum
     char sum = 0;
     for (int i = 0; i < integrity_index; i++)
@@ -47,8 +47,8 @@ static char checksum(const char buffer[], int integrity_index) {
     return sum;
 }
 
-static void timer_activated() {
-    if (state == STATE_NORMAL && wait && !timer_once) { // Skip if time has already been shortened
+static void timer_activated() { // Check if pedestrian button was pressed
+    if (state == STATE_NORMAL && !timer_once) { // Skip if time has already been shortened
         uint32_t now = millis();
         stop = start + (stop - now) / 2; // Halve the remaining time
         timer_once = true;
@@ -56,7 +56,7 @@ static void timer_activated() {
     }
 }
 
-static void print_msg(const char buffer[]) {
+static void print_msg(const char buffer[]) { // Print a messag
     Serial.print(  String((int)buffer[0]) + "|");
     Serial.print(  String((int)buffer[1]) + "|");
     Serial.print(  String((int)buffer[2]) + "|");
@@ -68,7 +68,7 @@ static void print_msg(const char buffer[]) {
     }
 }
 
-static void ct_send_message(int to, Operation op) {
+static void ct_send_message(int to, Operation op) { // Sends a message and waits a resposne
     if (to > N_ENTRIES)
         return;
     char buffer[BUF_MAX];
@@ -82,7 +82,7 @@ static void ct_send_message(int to, Operation op) {
     print_msg(buffer);
 
     int size = op == OP_PING ? 5 : 4;
-#ifdef __TL__ // Check if message is for this device
+#ifdef __TL__ // Check if message is for this device (only if Traffic Lights are also implemented)
     if (to == ENTRY_NUMBER) {
         tl_message(buffer);
         tl_response(buffer);
@@ -99,7 +99,7 @@ static void ct_send_message(int to, Operation op) {
     uint32_t next = 0;
     while (true) { // Wait for acknowledge
 
-        uint32_t now = millis();
+        uint32_t now = millis(); // Blink
         if (now >= next) {
             on = !on;
             digitalWrite(led_pin, on ? HIGH : LOW);
@@ -108,7 +108,7 @@ static void ct_send_message(int to, Operation op) {
 
         Wire.requestFrom(to, size);
         while (size > Wire.available()) {
-            uint32_t now = millis();
+            uint32_t now = millis(); // Blink
             if (now >= next) {
                 on = !on;
                 digitalWrite(led_pin, on ? HIGH : LOW);
@@ -119,13 +119,17 @@ static void ct_send_message(int to, Operation op) {
         for (int i = 0; i < size; i++)
             buffer[i] = Wire.read();
 
+        // If the response is correct, break from the loop
         if (op == OP_PING && buffer[1] == OP_STATUS)
             break;
         else if (buffer[1] == OP_ACK)
             break;
     }
 
+    // Return to normal
     digitalWrite(led_pin, HIGH);
+
+    // [DEBUG] Print response
     Serial.print("Response: ");
     print_msg(buffer);
 
@@ -133,6 +137,7 @@ parse_response:;
     if (buffer[1] == OP_STATUS) {
         char info = buffer[3];
 
+        // FAILURE; TURN EVERYTHING OFF
         if (info & (PEDEST_GREEN_FAILING | PEDEST_YELLOW_FAILING | PEDEST_RED_FAILING | GREEN_FAILING | YELLOW_FAILING | RED_FAILING)) {
             ct_send_message(1, OP_OFF);
             ct_send_message(2, OP_OFF);
@@ -141,12 +146,13 @@ parse_response:;
             state = STATE_FAULT;
         }
 
+        // If pedestrian button was activated
         if (info & TIMER_ACTIVATED)
             timer_activated();
     }
 }
 
-static void toggleOnOff() {
+static void toggleOnOff() { // Toggle the controller on and off
     if (state == STATE_OFF) { // Turn On
         state = STATE_ENTRY;
     } else {
@@ -159,14 +165,14 @@ static void toggleOnOff() {
     }
 }
 
-void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) {
+void ct_setup(int _led_pin, int _potetiometer_pin, int _button_pin) { // Setup controller
     led_pin = _led_pin;
     Wire.begin();
     inputs_setup(_button_pin, _potetiometer_pin);
     pinMode(led_pin, OUTPUT);
 }
 
-static void ping(unsigned int time) {
+static void ping(unsigned int time) { // Ping the current entry in intervals of <time>
     static uint32_t start = 0, stop = 0;
     static bool wait = false;
 
@@ -187,7 +193,7 @@ void ct_loop() {
     unsigned int last_pot = inputs.pot;
     inputs_check(&inputs);
 
-    if (inputs.button) {
+    if (inputs.button) { // Check button
         inputs.button = false;
         toggleOnOff();
     }
@@ -198,12 +204,13 @@ void ct_loop() {
             start = stop = 0;
         }
 
-        if (state == STATE_NORMAL)
+        if (state == STATE_NORMAL) // Ping the current led
             ping(200);
 
     } else {
         uint32_t time = map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX);
         switch (state) {
+            // Entering the normal state
             case STATE_ENTRY:
                 digitalWrite(led_pin, HIGH);
                 ct_send_message(2, OP_RED);

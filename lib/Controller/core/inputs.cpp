@@ -53,6 +53,7 @@ static bool check_button() { // check if button is released and debounced
   return ret;
 }
 
+// Check inputs
 void inputs_check(struct inputs *inputs) {
   if (check_button())
     inputs->button = true;
