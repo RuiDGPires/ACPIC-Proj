@@ -1,4 +1,14 @@
+#ifndef ENTRY_NUMBER
 #define ENTRY_NUMBER 1
+#endif
+
+#define PRINT_ONCE(msg) { \
+    static bool once = true;\
+    if (once) { \
+        Serial.println(msg); \
+        once = false; \
+    } \
+}
 #include <Arduino.h>
 #include <Wire.h>
 #include <TrafficLights.hpp>
@@ -51,6 +61,8 @@ void setup() {
 
     tl_setup(N9(2));
     Serial.println("Traffic Lights Setup Complete. Entry number: " + String(ENTRY_NUMBER));
+
+    PRINT_ONCE("ENTRY NUMBER: " + String(ENTRY_NUMBER));
 }
 
 void loop() {

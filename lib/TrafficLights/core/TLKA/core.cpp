@@ -26,7 +26,7 @@ static void reset() {
 void tlka_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestrian_red, int _pin_pedestrian_green, int _pin_button) {
     pin_red     = _pin_red;
     pin_yellow  = _pin_yellow;
-    pin_red     = _pin_green;
+    pin_green     = _pin_green;
     pin_pedestrian_green = _pin_pedestrian_green;
     pin_pedestrian_red = _pin_pedestrian_red;
     pin_button = _pin_button;
@@ -110,12 +110,19 @@ static void swap() {
 void tlka_block() {
     if (state == TLKA_STATE_GREEN)
         swap();
-    else; // ERROR, Do nothing??
+    else if (state == TLKA_STATE_DEFAULT) {
+        state = TLKA_STATE_GREEN;
+        swap();
+    }
 }
 
 void tlka_unblock() {
     if (state == TLKA_STATE_RED)
         swap();
+    else if (state == TLKA_STATE_DEFAULT) {
+        state = TLKA_STATE_RED;
+        swap();
+    }
     else; // ERROR, Do nothing??
 }
 

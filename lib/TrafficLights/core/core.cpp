@@ -149,6 +149,13 @@ void tl_message(const char buffer[]) {
             response.op = OP_STATUS;
             build_response();
             break;
+        case OP_OFF:
+            tlka_default();
+            tlkb_default();
+            state = TL_STATE_DEFAULT;
+            response.op = OP_ACK;
+            build_response();
+            break;
         default:
             break;
     }

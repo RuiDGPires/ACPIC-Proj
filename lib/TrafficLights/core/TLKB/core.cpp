@@ -23,7 +23,7 @@ static void reset() {
 void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green) {
     pin_red     = _pin_red;
     pin_yellow  = _pin_yellow;
-    pin_red     = _pin_green;
+    pin_green     = _pin_green;
 
     pinMode(pin_red, OUTPUT);
     pinMode(pin_yellow, OUTPUT);

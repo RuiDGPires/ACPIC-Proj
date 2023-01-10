@@ -1,3 +1,7 @@
+#ifndef N_ENTRIES
+#define N_ENTRIES 1
+#endif
+
 #include <Arduino.h>
 #include <Controller.hpp>
 #include <Wire.h>

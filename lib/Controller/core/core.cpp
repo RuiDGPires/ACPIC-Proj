@@ -56,7 +56,7 @@ static void print_msg(const char buffer[]) {
 }
 
 static void ct_send_message(int to, Operation op) {
-    if (to != 1)
+    if (to > N_ENTRIES)
         return;
     char buffer[BUF_MAX];
 
@@ -128,6 +128,7 @@ static void toggleOnOff() {
 }
 
 #define WAIT_FOR(time) {\
+    Serial.println("Waiting for: " + String(time)); \
     start = millis(); \
     stop = start + (time); \
     wait = true; \
@@ -166,7 +167,14 @@ static void ping(unsigned int time) {
 }
 
 void ct_loop() {
+    unsigned int last_pot = inputs.pot;
     inputs_check(&inputs);
+
+    const static int error = 5;
+    
+    if (inputs.pot > last_pot + error || inputs.pot < last_pot - error) {
+        Serial.println("Pot: " + String(inputs.pot));
+    }
 
     if (inputs.button) {
         inputs.button = false;
@@ -183,8 +191,7 @@ void ct_loop() {
         //    ping(1000);
 
     } else {
-        static uint32_t time = map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX);
-        PRINT_ONCE("Time:" + String(time));
+        uint32_t time = map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX);
         switch (state) {
             case STATE_ENTRY:
                 digitalWrite(led_pin, HIGH);
