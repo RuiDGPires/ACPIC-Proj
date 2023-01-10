@@ -78,6 +78,15 @@ void build_response() {
 }
 
 void tl_loop() {
+    if (tlka_fault_r()) {
+        status |= RED_FAILING;
+    }
+    if (tlka_fault_pr()) {
+        status |= PEDEST_RED_FAILING;
+    }
+    if (tlkb_fault_r()) {
+        status |= RED_FAILING;
+    }
     if (tlka_check_button()) {
         status |= TIMER_ACTIVATED;
     }

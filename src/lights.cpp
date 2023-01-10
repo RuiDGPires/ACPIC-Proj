@@ -59,7 +59,7 @@ void setup() {
     Wire.onReceive(receiveEvent);
     Wire.onRequest(requestEvent);
 
-    tl_setup(N9(2));
+    tl_setup(A2, 3, 4, 5, A1, 7, A0, 9, 10);
     Serial.println("Traffic Lights Setup Complete. Entry number: " + String(ENTRY_NUMBER));
 
     PRINT_ONCE("ENTRY NUMBER: " + String(ENTRY_NUMBER));

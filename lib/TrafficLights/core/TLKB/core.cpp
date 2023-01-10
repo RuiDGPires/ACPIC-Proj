@@ -14,6 +14,12 @@ static TLKB_State state = TLKB_STATE_DEFAULT;
 static StateContext ctx = {false, false};
 static int pin_red, pin_yellow, pin_green;
 
+static bool fault_r;
+
+bool tlkb_fault_r() {
+    return fault_r;
+}
+
 static void reset() {
     digitalWrite(pin_red, LOW);
     digitalWrite(pin_yellow, LOW);
@@ -39,6 +45,11 @@ void tlkb_setup(int _pin_red, int _pin_yellow, int _pin_green) {
     wait = true; \
 }
 
+static bool red_pin_ok(int pin) {
+    static const int error = 15, base = 963;
+    unsigned int val = analogRead(pin);
+    return  val >= base - error && val <= base + error;
+}
 
 void tlkb_loop() {
     static bool wait = false;
@@ -51,6 +62,7 @@ void tlkb_loop() {
             if (state == TLKB_STATE_G2R) {
                 digitalWrite(pin_yellow, LOW);
                 digitalWrite(pin_red, HIGH);
+                fault_r = !red_pin_ok(pin_red);
                 state = TLKB_STATE_RED;
             } else if (state == TLKB_STATE_R2G) {
                 digitalWrite(pin_yellow, LOW);

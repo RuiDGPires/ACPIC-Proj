@@ -19,4 +19,7 @@ TLKA_State tlka_state();
 void tlka_default();
 bool tlka_check_button();
 
+bool tlka_fault_pr();
+bool tlka_fault_r();
+
 #endif

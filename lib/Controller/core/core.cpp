@@ -52,6 +52,7 @@ static void timer_activated() {
         uint32_t now = millis();
         stop = start + (stop - now) / 2; // Halve the remaining time
         timer_once = true;
+        Serial.println("Timer Activated");
     }
 }
 
@@ -182,23 +183,9 @@ static void ping(unsigned int time) {
     }
 }
 
-#define PRINT_ONCE(msg) { \
-    static bool once = true;\
-    if (once) { \
-        Serial.println(msg); \
-        once = false; \
-    } \
-}
-
 void ct_loop() {
     unsigned int last_pot = inputs.pot;
     inputs_check(&inputs);
-
-    const static int error = 5;
-    
-    if (inputs.pot > last_pot + error || inputs.pot < last_pot - error) {
-        //Serial.println("Pot: " + String(inputs.pot));
-    }
 
     if (inputs.button) {
         inputs.button = false;
@@ -211,8 +198,8 @@ void ct_loop() {
             start = stop = 0;
         }
 
-        //if (state == STATE_NORMAL)
-        //    ping(200);
+        if (state == STATE_NORMAL)
+            ping(200);
 
     } else {
         uint32_t time = map(inputs.pot, POT_MIN, POT_MAX, PERIOD_MIN, PERIOD_MAX);

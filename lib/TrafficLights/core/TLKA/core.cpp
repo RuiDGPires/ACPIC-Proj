@@ -14,6 +14,15 @@ static TLKA_State state = TLKA_STATE_DEFAULT;
 static StateContext ctx;
 
 static int pin_red, pin_yellow, pin_green, pin_pedestrian_green, pin_pedestrian_red, pin_button;
+static bool fault_pr, fault_r;
+
+bool tlka_fault_pr(){
+    return fault_pr;
+}
+
+bool tlka_fault_r() {
+    return fault_r;
+}
 
 static void reset() {
     digitalWrite(pin_red, LOW);
@@ -47,6 +56,12 @@ void tlka_setup(int _pin_red, int _pin_yellow, int _pin_green, int _pin_pedestri
     wait = true; \
 }
 
+static bool red_pin_ok(int pin) {
+    static const int error = 15, base = 963;
+    unsigned int val = analogRead(pin);
+    return  val >= base - error && val <= base + error;
+}
+
 void tlka_loop() {
     static bool wait = false;
     static uint32_t start = 0, stop = 0;
@@ -58,6 +73,9 @@ void tlka_loop() {
             if (state == TLKA_STATE_G2R) {
                 digitalWrite(pin_yellow, LOW);
                 digitalWrite(pin_red, HIGH);
+                
+                fault_r = !red_pin_ok(pin_red);
+
                 state = TLKA_STATE_RED;
                 // Pedestrian RED
                 digitalWrite(pin_pedestrian_red, LOW);
@@ -92,6 +110,7 @@ void tlka_loop() {
                     // Pedestrian RED
                     digitalWrite(pin_pedestrian_green, LOW);
                     digitalWrite(pin_pedestrian_red, HIGH);
+                    fault_pr = !red_pin_ok(pin_pedestrian_red);
                     //--
                     digitalWrite(pin_red, LOW);
                     digitalWrite(pin_yellow, HIGH);
