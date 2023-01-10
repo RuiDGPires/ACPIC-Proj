@@ -68,6 +68,9 @@ static void print_msg(const char buffer[]) { // Print a messag
     }
 }
 
+static char faults[4] = {0, 0, 0, 0};
+static char faults_new[4] = {0, 0, 0, 0};
+
 static void ct_send_message(int to, Operation op) { // Sends a message and waits a resposne
     if (to > N_ENTRIES)
         return;
@@ -136,9 +139,11 @@ static void ct_send_message(int to, Operation op) { // Sends a message and waits
 parse_response:;
     if (buffer[1] == OP_STATUS) {
         char info = buffer[3];
+        const char any_fault = PEDEST_GREEN_FAILING | PEDEST_YELLOW_FAILING | PEDEST_RED_FAILING | GREEN_FAILING | YELLOW_FAILING | RED_FAILING;
 
-        // FAILURE; TURN EVERYTHING OFF
-        if (info & (PEDEST_GREEN_FAILING | PEDEST_YELLOW_FAILING | PEDEST_RED_FAILING | GREEN_FAILING | YELLOW_FAILING | RED_FAILING)) {
+        faults_new[to] |= info & any_fault;
+        if (faults[to] & faults_new[to]) {
+            // FAILURE; TURN EVERYTHING OFF
             ct_send_message(1, OP_OFF);
             ct_send_message(2, OP_OFF);
             ct_send_message(3, OP_OFF);
@@ -150,6 +155,17 @@ parse_response:;
         if (info & TIMER_ACTIVATED)
             timer_activated();
     }
+}
+
+static void clear_faults() {
+    faults[0] = faults_new[0];
+    faults[1] = faults_new[1];
+    faults[2] = faults_new[2];
+    faults[3] = faults_new[3];
+    faults_new[0] = 0;
+    faults_new[1] = 0;
+    faults_new[2] = 0;
+    faults_new[3] = 0;
 }
 
 static void toggleOnOff() { // Toggle the controller on and off
@@ -190,7 +206,6 @@ static void ping(unsigned int time) { // Ping the current entry in intervals of 
 }
 
 void ct_loop() {
-    unsigned int last_pot = inputs.pot;
     inputs_check(&inputs);
 
     if (inputs.button) { // Check button
@@ -218,6 +233,11 @@ void ct_loop() {
                 ct_send_message(4, OP_RED);
                 //--
                 current = 1;
+
+                // Double clear faults to clear both buffers;
+                clear_faults();
+                clear_faults();
+
                 ct_send_message(current, OP_GREEN);
                 state = STATE_NORMAL;
                 WAIT_FOR(time);
@@ -225,6 +245,9 @@ void ct_loop() {
             case STATE_NORMAL:
                 ct_send_message(current, OP_RED);
                 current = (current % 4) + 1;
+
+                if (current == 1) // New cycle
+                    clear_faults();
                 ct_send_message(current, OP_GREEN);
                 timer_once = false;
                 WAIT_FOR(time);
