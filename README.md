@@ -1,7 +1,8 @@
 # Control of Traffic Lights at a Roundabout
 
 This was an academic project for the course **Aplications and Computation for the IoT**.
-[Project description]()
+
+[Project description](ACIC--lab_3--project--2022-12-21.pdf)
 
 ---
 
